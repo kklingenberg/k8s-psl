@@ -8,16 +8,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
 
-      - name: install musl
+      - name: Install musl
         run: sudo apt install -y musl-tools
 
-      - name: setup build target
+      - name: Setup build target
         run: rustup target add x86_64-unknown-linux-musl
 
-      - name: cargo build
+      - name: Build binary
         run: cargo build --release --locked --target=x86_64-unknown-linux-musl
 
       - name: Compress binary
@@ -28,10 +30,6 @@ jobs:
           strip: true
 
       - name: Upload binary to release
-        uses: svenstaro/upload-release-action@v2
+        uses: ncipollo/release-action@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/x86_64-unknown-linux-musl/release/k8s-psl
-          asset_name: k8s-psl
-          tag: ${{ github.ref }}
-          overwrite: true
+          artifacts: target/x86_64-unknown-linux-musl/release/k8s-psl
