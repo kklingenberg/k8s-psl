@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: install musl
+        run: apt install -y musl-tools
+
       - name: setup build target
         run: rustup target add x86_64-unknown-linux-musl
 
