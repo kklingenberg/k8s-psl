@@ -1,0 +1,34 @@
+name: Build binaries
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: setup build target
+        run: rustup target add x86_64-unknown-linux-musl
+
+      - name: cargo build
+        run: cargo build --release --locked --target=x86_64-unknown-linux-musl
+
+      - name: Compress binary
+        uses: svenstaro/upx-action@v2
+        with:
+          file: target/x86_64-unknown-linux-musl/release/k8s-psl
+          args: --lzma
+          strip: true
+
+      - name: Upload binary to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/x86_64-unknown-linux-musl/release/k8s-psl
+          asset_name: k8s-psl
+          tag: ${{ github.ref }}
+          overwrite: true
